@@ -1,0 +1,47 @@
+import tkinter as tk
+import random
+
+def random_color():
+    return f"#{random.randint(0, 255):02x}{random.randint(0, 255):02x}{random.randint(0, 255):02x}"
+
+def random_position():
+    return random.randint(20, 780), random.randint(20, 580)
+
+def move_blocks():
+    global blocks, block_count
+    for block in blocks:
+        canvas.move(block["id"], block["dx"], block["dy"])
+        x1, y1, x2, y2 = canvas.coords(block["id"])
+
+        if x1 <= 0 or y1 <= 0 or x2 >= 800 or y2 >= 600:
+            new_x, new_y = random_position()
+            block_count += 1
+            counter_label.config(text=f"Block Count: {block_count}")
+            new_id = canvas.create_rectangle(new_x - 20, new_y - 20, new_x + 20, new_y + 20, 
+                                             fill=random_color(), outline="")
+            blocks.append({"id": new_id, "dx": random.choice([-3, 3]), "dy": random.choice([-3, 3])})
+            block["dx"], block["dy"] = -block["dx"], -block["dy"]
+
+    root.after(speed_control.get(), move_blocks)
+
+root = tk.Tk()
+root.title("hmmza's")
+canvas = tk.Canvas(root, width=800, height=600, bg="white")
+canvas.pack()
+
+counter_label = tk.Label(root, text="Block Count: 1", font=("Arial", 14), bg="white", fg="black")
+counter_label.pack(side=tk.BOTTOM)
+
+speed_control = tk.Scale(root, from_=10, to=200, orient=tk.HORIZONTAL, label="Speed Control (ms)", font=("Arial", 10))
+speed_control.set(50)  # Default speed
+speed_control.pack(side=tk.BOTTOM)
+
+blocks = []
+block_count = 1
+initial_block = {"id": canvas.create_rectangle(390, 290, 410, 310, fill=random_color(), outline=""),
+                 "dx": random.choice([-3, 3]),
+                 "dy": random.choice([-3, 3])}
+blocks.append(initial_block)
+
+move_blocks()
+root.mainloop()
